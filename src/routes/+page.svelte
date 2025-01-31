@@ -85,12 +85,12 @@
 
 <h1 class="visually-hidden">Cosmere Character Guessing Game</h1>
 
-<button class="restart selected" on:click={restartGame}> New Game? </button>
+<Button class="restart selected" onclick={restartGame}> New Game? </Button>
 
 <form on:submit|preventDefault={handleGuess}>
 	{#if !won && data.clues.length < 5}
 		<!-- <input type="text" bind:value={currentGuess} class="guess" /> -->
-		<Textfield type="text" bind:value={currentGuess} />
+		<Textfield type="text" bind:value={currentGuess} label="Type guess here" style="min-width: 50vw" />
 	{/if}
 	<!-- <a class="how-to-play" href="/wtcc/how-to-play">How to play</a> -->
 
@@ -139,7 +139,7 @@
 		style="position: absolute; left: 50%; top: 0%"
 		use:confetti={{
 			particleCount: reducedMotion.current ? 0 : undefined,
-			force: 0.3,
+			force: 0.5,
 			stageWidth: window.innerWidth,
 			stageHeight: window.innerHeight,
 			colors: ['#ff3e00', '#40b3ff', '#676778']

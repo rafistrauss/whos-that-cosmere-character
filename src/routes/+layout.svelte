@@ -23,6 +23,7 @@
 	:global(body) {
 		background-color: white;
 		color: black;
+		overflow: hidden;
 	}
 
 	@media (prefers-color-scheme: dark) {
