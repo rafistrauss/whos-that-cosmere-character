@@ -1,9 +1,15 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import Header from './Header.svelte';
 	import '../app.css';
 
 	let { children } = $props();
 </script>
+
+<svelte:head>
+	<link rel="stylesheet" href="{base}/smui.css" media="(prefers-color-scheme: light)" />
+	<link rel="stylesheet" href="{base}/smui-dark.css" media="screen and (prefers-color-scheme: dark)" />
+</svelte:head>
 
 <div class="app">
 	<Header />
