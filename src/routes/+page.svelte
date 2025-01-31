@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { confetti } from '@neoconfetti/svelte';
 	import { Game } from './game';
+	import Textfield from '@smui/textfield';
+	import Button from '@smui/button';
+	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
+
 	import { onMount } from 'svelte';
 
 	let game: Game;
@@ -23,7 +27,7 @@
 	function initializeData() {
 		data.guesses = game.guesses;
 		data.clues = Array.from({ length: game.cluesGiven }, (_, i) => game.getClue(i));
-		
+
 		data.primaryAnswer = game.primaryAnswer;
 		data.alternateAnswers = game.alternateAnswers;
 	}
@@ -32,7 +36,9 @@
 		if (!game) return;
 		won =
 			game.guesses.length > 0 &&
-			[game.primaryAnswer, ...game.alternateAnswers].some(answer => game.guesses[game.guesses.length - 1].toLowerCase() === answer.toLowerCase());
+			[game.primaryAnswer, ...game.alternateAnswers].some(
+				(answer) => game.guesses[game.guesses.length - 1].toLowerCase() === answer.toLowerCase()
+			);
 		submittable = currentGuess.length > 0;
 		localStorage.setItem('wtcc', game.toString());
 	}
@@ -82,29 +88,48 @@
 <button class="restart selected" on:click={restartGame}> New Game? </button>
 
 <form on:submit|preventDefault={handleGuess}>
+	{#if !won && data.clues.length < 5}
+		<!-- <input type="text" bind:value={currentGuess} class="guess" /> -->
+		<Textfield type="text" bind:value={currentGuess} />
+	{/if}
 	<!-- <a class="how-to-play" href="/wtcc/how-to-play">How to play</a> -->
 
-	<div class="grid" class:playing={!won} class:bad-guess={form?.badGuess}>
-		{#each Array.from(Array(5).keys()) as row (row)}
-			{@const current = row === index}
-			<h2 class="visually-hidden">Clue {row + 1}</h2>
-			<div class="row" class:current={current}>
-				<div class="clue">{data.clues[row]}</div>
-			</div>
-		{/each}
-		<input type="text" bind:value={currentGuess} class="guess" />
-	</div>
+	<DataTable class="grid">
+		<Head>
+			{#each Array.from(Array(5).keys()) as row (row)}
+				{@const current = row === index}
+				<Row>
+					<Cell class="visually-hidden">Clue {row + 1}</Cell>
+					<Cell class="clue">{data.clues[row]}</Cell>
+					<Cell class="guess">
+						{#if data.guesses[row]}
+							{data.guesses[row]}
+							{#if [data.primaryAnswer, ...data.alternateAnswers].some((answer) => data.guesses[row].toLowerCase() === answer.toLowerCase())}
+								<span>✔️</span>
+							{:else}
+								<span>❌</span>
+							{/if}
+						{/if}
+					</Cell>
+				</Row>
+			{/each}
+		</Head>
+	</DataTable>
 
 	<div class="controls">
 		{#if won || data.clues.length >= 5}
 			{#if data.primaryAnswer}
-				<p>the answer was "<strong>{data.primaryAnswer}</strong>{#if data.alternateAnswers.length > 0} (also acceptable: {data.alternateAnswers.join(', ')}){/if}"</p>
+				<p>
+					the answer was "<strong>{data.primaryAnswer}</strong
+					>{#if data.alternateAnswers.length > 0}
+						(also acceptable: {data.alternateAnswers.join(', ')}){/if}"
+				</p>
 			{/if}
-			<button data-key="enter" class="restart selected" on:click={restartGame}>
+			<Button data-key="enter" class="restart selected" onclick={restartGame}>
 				{won ? 'you won :)' : `game over :(`} play again?
-			</button>
+			</Button>
 		{:else}
-		<button type="submit" class="submit" disabled={!submittable}>Submit Guess</button>
+			<Button type="submit" class="submit" disabled={!submittable}>Submit Guess</Button>
 		{/if}
 	</div>
 </form>
@@ -119,8 +144,7 @@
 			stageHeight: window.innerHeight,
 			colors: ['#ff3e00', '#40b3ff', '#676778']
 		}}
-	>
-	</div>
+	></div>
 {/if}
 
 <style>
@@ -156,9 +180,8 @@
 		top: -0.05em;
 	}
 
-	.grid {
-		--width: min(100vw, 50vh, 680px);
-		max-width: var(--width);
+	:global(.grid) {
+		width: 80vw;
 		align-self: center;
 		justify-self: center;
 		width: 100%;
@@ -170,7 +193,7 @@
 
 	.grid .row {
 		display: grid;
-		grid-template-columns: 1fr;
+		grid-template-columns: 1fr 1fr;
 		grid-gap: 0.2rem;
 		margin: 0 0 0.2rem 0;
 	}
@@ -183,10 +206,12 @@
 	}
 
 	.guess {
-		background: white;
 		color: black;
 		padding: 0.5rem;
 		border-radius: 2px;
+		background: transparent;
+		border: none;
+		border-bottom: 2px solid darkgray;
 	}
 
 	.controls {
