@@ -15,16 +15,19 @@
 	let data: any = { clues: [], guesses: [], primaryAnswer: '', alternateAnswers: [] };
 	let index: number = 1;
 	let reducedMotion: any = { current: false };
+	let gameNumber = 1;
 
 	onMount(() => {
 		const serializedGame = localStorage.getItem('wtcc');
 		game = new Game(serializedGame || undefined);
+		
 		initializeData();
 		updateState();
 		showFirstClue();
 	});
 
 	function initializeData() {
+		gameNumber = game.index + 1;
 		data.guesses = game.guesses;
 		data.clues = Array.from({ length: game.cluesGiven }, (_, i) => game.getClue(i));
 
@@ -84,6 +87,9 @@
 </svelte:head>
 
 <h1 class="visually-hidden">Cosmere Character Guessing Game</h1>
+
+<div class="mdc-typography--headline3">Current game: {gameNumber}</div>
+
 
 <Button class="restart selected" onclick={restartGame}> New Game? </Button>
 
