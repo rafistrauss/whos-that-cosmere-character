@@ -8,7 +8,11 @@
 
 <svelte:head>
 	<link rel="stylesheet" href="{base}/smui.css" media="(prefers-color-scheme: light)" />
-	<link rel="stylesheet" href="{base}/smui-dark.css" media="screen and (prefers-color-scheme: dark)" />
+	<link
+		rel="stylesheet"
+		href="{base}/smui-dark.css"
+		media="screen and (prefers-color-scheme: dark)"
+	/>
 </svelte:head>
 
 <div class="app">
@@ -19,8 +23,8 @@
 	</main>
 
 	<footer>
-		<p>
-			visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to learn about SvelteKit
+		<p style="font-size: small;">
+			Disclaimer: This is a fan-made site and is not affiliated with Brandon Sanderson or Dragonsteel Entertainment. All rights to the characters and stories mentioned belong to their respective owners.
 		</p>
 	</footer>
 </div>
