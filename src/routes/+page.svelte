@@ -32,6 +32,10 @@
 		data.guesses = game.guesses;
 		data.clues = Array.from({ length: game.cluesGiven }, (_, i) => game.getClue(i));
 
+		if (won) {
+			data.clues = Array.from({ length: 5 }, (_, i) => game.getClue(i));
+		}
+
 		data.primaryAnswer = game.primaryAnswer;
 		data.alternateAnswers = game.alternateAnswers;
 	}
