@@ -6,6 +6,7 @@
 	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
 
 	import { onMount } from 'svelte';
+	import { games } from './characters';
 
 	let game: Game;
 	let currentGuess = '';
@@ -32,6 +33,10 @@
 		gameNumber = game.index + 1;
 		data.guesses = game.guesses;
 		data.clues = Array.from({ length: game.cluesGiven }, (_, i) => game.getClue(i));
+
+		if (won) {
+			data.clues = Array.from({ length: 5 }, (_, i) => game.getClue(i));
+		}
 
 		data.primaryAnswer = game.primaryAnswer;
 		data.alternateAnswers = game.alternateAnswers;
@@ -90,13 +95,13 @@
 
 <h1 class="visually-hidden">Cosmere Character Guessing Game</h1>
 
-<div class="mdc-typography--headline3">Current game: {gameNumber}</div>
+<div class="mdc-typography--headline3">Current game: {gameNumber} / {games.length}</div>
 
 
 <Button class="restart selected" onclick={restartGame}> New Game? </Button>
 
 <form on:submit|preventDefault={handleGuess}>
-	{#if !won && data.clues.length < 5}
+	{#if !won && data.guesses.length < 5}
 		<!-- <input type="text" bind:value={currentGuess} class="guess" /> -->
 		<Textfield type="text" bind:value={currentGuess} label="Type guess here" style="min-width: 50vw" />
 	{/if}
@@ -125,7 +130,7 @@
 	</DataTable>
 
 	<div class="controls">
-		{#if won || data.clues.length >= 5}
+		{#if won || data.guesses.length >= 5}
 			{#if data.primaryAnswer}
 				<p>
 					the answer was "<strong>{data.primaryAnswer}</strong
