@@ -1,5 +1,7 @@
 import { games, clues } from './characters';
 
+let lastGameIndex = -1;
+
 export class Game {
 	index: number;
 	guesses: string[];
@@ -19,7 +21,10 @@ export class Game {
 			this.guesses = guesses ? guesses.split(' ') : [];
 			this.cluesGiven = +cluesGiven;
 		} else {
-			this.index = Math.floor(Math.random() * games.length);
+			do {
+				this.index = Math.floor(Math.random() * games.length);
+			} while (this.index === lastGameIndex);
+			lastGameIndex = this.index;
 			this.guesses = [];
 			this.cluesGiven = 1;
 		}
@@ -27,8 +32,6 @@ export class Game {
 		console.log(this.index);
 		console.log(games);
 		console.log(games[this.index]);
-
-		
 
 		this.primaryAnswer = games[this.index].names[0];
 		this.alternateAnswers = games[this.index].names.slice(1);
