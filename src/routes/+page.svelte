@@ -20,6 +20,8 @@
 	onMount(() => {
 		const serializedGame = localStorage.getItem('wtcc');
 		game = new Game(serializedGame || undefined);
+
+		console.log('game', game);
 		
 		initializeData();
 		updateState();

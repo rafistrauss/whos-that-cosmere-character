@@ -42,6 +42,7 @@
 		"vite": "^6.0.0"
 	},
 	"dependencies": {
-		"@smui/textfield": "^8.0.0-beta.3"
+		"@smui/textfield": "^8.0.0-beta.3",
+		"firebase": "^11.2.0"
 	}
 }

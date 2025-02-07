@@ -4,6 +4,7 @@ export class Game {
 	index: number;
 	guesses: string[];
 	cluesGiven: number;
+	clues: string[] = [];
 	primaryAnswer: string;
 	alternateAnswers: string[];
 
@@ -24,14 +25,14 @@ export class Game {
 			this.cluesGiven = 1;
 		}
 
-		console.log(this.index);
-		console.log(games);
-		console.log(games[this.index]);
+		this.initializeGameData();
+	}
 
-		
-
-		this.primaryAnswer = games[this.index].names[0];
-		this.alternateAnswers = games[this.index].names.slice(1);
+	initializeGameData() {
+		const gameData = games[this.index].clue;
+		this.primaryAnswer = gameData.names[0];
+		this.alternateAnswers = gameData.names.slice(1);
+		this.clues = gameData.clues;
 	}
 
 	/**
@@ -53,7 +54,7 @@ export class Game {
 	 * Get the next clue for the character
 	 */
 	getClue(clueIndex: number) {
-		return clues[this.index][clueIndex];
+		return clues[this.index].clues[clueIndex];
 	}
 
 	/**
