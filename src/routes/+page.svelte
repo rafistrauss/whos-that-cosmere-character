@@ -172,27 +172,6 @@
 		flex: 1;
 	}
 
-	.how-to-play {
-		color: var(--color-text);
-	}
-
-	.how-to-play::before {
-		content: 'i';
-		display: inline-block;
-		font-size: 0.8em;
-		font-weight: 900;
-		width: 1em;
-		height: 1em;
-		padding: 0.2em;
-		line-height: 1;
-		border: 1.5px solid var(--color-text);
-		border-radius: 50%;
-		text-align: center;
-		margin: 0 0.5em 0 0;
-		position: relative;
-		top: -0.05em;
-	}
-
 	:global(.grid) {
 		width: 80vw;
 		align-self: center;
@@ -204,28 +183,6 @@
 		justify-content: flex-start;
 	}
 
-	.grid .row {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		grid-gap: 0.2rem;
-		margin: 0 0 0.2rem 0;
-	}
-
-	.clue {
-		background: var(--color-theme-2);
-		color: white;
-		padding: 0.5rem;
-		border-radius: 2px;
-	}
-
-	.guess {
-		color: black;
-		padding: 0.5rem;
-		border-radius: 2px;
-		background: transparent;
-		border: none;
-		border-bottom: 2px solid darkgray;
-	}
 
 	.controls {
 		text-align: center;
@@ -233,33 +190,4 @@
 		height: min(18vh, 10rem);
 	}
 
-	.submit {
-		width: 100%;
-		padding: 1rem;
-		background: rgba(255, 255, 255, 0.5);
-		border-radius: 2px;
-		border: none;
-	}
-
-	.submit:focus,
-	.submit:hover {
-		background: var(--color-theme-1);
-		color: white;
-		outline: none;
-	}
-
-	.restart {
-		width: 100%;
-		padding: 1rem;
-		background: rgba(255, 255, 255, 0.5);
-		border-radius: 2px;
-		border: none;
-	}
-
-	.restart:focus,
-	.restart:hover {
-		background: var(--color-theme-1);
-		color: white;
-		outline: none;
-	}
 </style>
