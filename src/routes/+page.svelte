@@ -78,6 +78,7 @@
 	function restartGame() {
 		localStorage.removeItem('wtcc');
 		game = new Game(games);
+		won = false; // Reset the won state
 		initializeData();
 		updateState();
 		showFirstClue();
@@ -108,16 +109,25 @@
 
 <Button class="restart selected" onclick={restartGame}>New Game?</Button>
 
-<form onsubmit={handleGuess}>
-	{#if !won && $data.guesses.length < 5}
-		<Textfield
-			type="text"
-			bind:value={currentGuess}
-			label="Type guess here"
-			style="min-width: 50vw"
-		/>
-	{/if}
-</form>
+{#if !won && $data.guesses.length < 5}
+    <form class="guess-and-answer-container" onsubmit={handleGuess}>
+        <Textfield
+            type="text"
+            bind:value={currentGuess}
+            label="Type guess here"
+            style="min-width: 50vw"
+        />
+    </form>
+{:else}
+    <div class="guess-and-answer-container">
+        {#if $data.primaryAnswer}
+            <p>
+                the answer was "<strong>{$data.primaryAnswer}</strong>{#if $data.alternateAnswers.length > 0}
+                    (also acceptable: {$data.alternateAnswers.join(', ')}){/if}"
+            </p>
+        {/if}
+    </div>
+{/if}
 
 <DataTable class="grid">
     <Body>
@@ -144,12 +154,6 @@
 
 <div class="controls">
 	{#if won || $data.guesses.length >= 5}
-		{#if $data.primaryAnswer}
-			<p>
-				the answer was "<strong>{$data.primaryAnswer}</strong>{#if $data.alternateAnswers.length > 0}
-					(also acceptable: {$data.alternateAnswers.join(', ')}){/if}"
-			</p>
-		{/if}
 		<Button data-key="enter" class="restart selected" onclick={restartGame}>
 			{won ? 'you won :)' : `game over :(`} play again?
 		</Button>
@@ -172,16 +176,17 @@
 {/if}
 
 <style>
-	form {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 1rem;
-		padding: 5em 0;
-	}
+.guess-and-answer-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 5em 0;
+    min-height: 10rem; /* Ensures consistent vertical space */
+}
 
 	:global(.grid) {
 		width: 80vw;
