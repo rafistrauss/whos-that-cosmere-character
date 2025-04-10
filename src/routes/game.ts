@@ -1,5 +1,3 @@
-import { games, clues } from './characters';
-
 let lastGameIndex = -1;
 
 export class Game {
@@ -13,7 +11,7 @@ export class Game {
 	/**
 	 * Create a game object from the player's cookie, or initialise a new game
 	 */
-	constructor(serialized: string | undefined = undefined) {
+	constructor(games: any[], serialized: string | undefined = undefined) {
 		if (serialized) {
 			console.log(serialized);
 			const [index, guesses, cluesGiven] = serialized.split('-');
@@ -30,10 +28,10 @@ export class Game {
 			this.cluesGiven = 1;
 		}
 
-		this.initializeGameData();
+		this.initializeGameData(games);
 	}
 
-	initializeGameData() {
+	initializeGameData(games: any[]) {
 		const gameData = games[this.index].clue;
 		this.primaryAnswer = gameData.names[0];
 		this.alternateAnswers = gameData.names.slice(1);
@@ -59,7 +57,7 @@ export class Game {
 	 * Get the next clue for the character
 	 */
 	getClue(clueIndex: number) {
-		return clues[this.index].clues[clueIndex];
+		return this.clues[clueIndex];
 	}
 
 	/**

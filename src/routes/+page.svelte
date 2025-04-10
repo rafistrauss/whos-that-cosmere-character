@@ -3,27 +3,29 @@
 	import { Game } from './game';
 	import Textfield from '@smui/textfield';
 	import Button from '@smui/button';
-	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
+	import DataTable, { Body, Row, Cell } from '@smui/data-table';
+	import { writable } from 'svelte/store';
 
 	import { onMount } from 'svelte';
-	import { games } from './characters';
+	import type { PageProps } from './$types';
+	let { data: pageProps }: PageProps = $props();
+
+	let { games } = pageProps;
 
 	let game: Game;
-	let currentGuess = '';
-	let won = false;
-	let submittable = false;
+	let currentGuess = $state('');
+	let won = $state(false);
+	let submittable = $derived(currentGuess.length > 0);
 	let form: any = {};
-	let data: any = { clues: [], guesses: [], primaryAnswer: '', alternateAnswers: [] };
+	const data = writable({ clues: [], guesses: [], primaryAnswer: '', alternateAnswers: [] });
 	let index: number = 1;
 	let reducedMotion: any = { current: false };
-	let gameNumber = 1;
+	let gameNumber = $state(1);
 
 	onMount(() => {
 		const serializedGame = localStorage.getItem('wtcc');
-		game = new Game(serializedGame || undefined);
+		game = new Game(games, serializedGame || undefined);
 
-		console.log('game', game);
-		
 		initializeData();
 		updateState();
 		showFirstClue();
@@ -31,15 +33,19 @@
 
 	function initializeData() {
 		gameNumber = game.index + 1;
-		data.guesses = game.guesses;
-		data.clues = Array.from({ length: game.cluesGiven }, (_, i) => game.getClue(i));
+		data.update((d) => {
+			d.guesses = game.guesses;
+			d.clues = Array.from({ length: game.cluesGiven }, (_, i) => game.getClue(i));
+			console.log('initial data.clues', d.clues);
 
-		if (won) {
-			data.clues = Array.from({ length: 5 }, (_, i) => game.getClue(i));
-		}
+			if (won) {
+				d.clues = Array.from({ length: 5 }, (_, i) => game.getClue(i));
+			}
 
-		data.primaryAnswer = game.primaryAnswer;
-		data.alternateAnswers = game.alternateAnswers;
+			d.primaryAnswer = game.primaryAnswer;
+			d.alternateAnswers = game.alternateAnswers;
+			return d;
+		});
 	}
 
 	function updateState() {
@@ -49,11 +55,11 @@
 			[game.primaryAnswer, ...game.alternateAnswers].some(
 				(answer) => game.guesses[game.guesses.length - 1].toLowerCase() === answer.toLowerCase()
 			);
-		submittable = currentGuess.length > 0;
 		localStorage.setItem('wtcc', game.toString());
 	}
 
-	function handleGuess() {
+	function handleGuess(event: SubmitEvent | KeyboardEvent) {
+		event.preventDefault();
 		if (game.enter(currentGuess)) {
 			won = true;
 		}
@@ -64,26 +70,29 @@
 
 	function handleKey(event: KeyboardEvent) {
 		if (event.key === 'Enter' && submittable) {
-			handleGuess();
+			handleGuess(event);
 		}
 		updateState();
 	}
 
 	function restartGame() {
 		localStorage.removeItem('wtcc');
-		game = new Game();
+		game = new Game(games);
 		initializeData();
 		updateState();
 		showFirstClue();
 	}
 
 	function showFirstClue() {
-		if (data.clues.length === 0) {
-			data.clues.push(game.getClue(0));
-		}
+		data.update((d) => {
+			if (d.clues.length === 0) {
+				const clue = game.getClue(0);
+				console.log('Adding first clue:', clue);
+				d.clues.push(clue);
+			}
+			return d;
+		});
 	}
-
-	$: updateState();
 </script>
 
 <svelte:window onkeyup={handleKey} />
@@ -97,55 +106,57 @@
 
 <div class="mdc-typography--headline3">Current game: {gameNumber} / {games.length}</div>
 
+<Button class="restart selected" onclick={restartGame}>New Game?</Button>
 
-<Button class="restart selected" onclick={restartGame}> New Game? </Button>
-
-<form on:submit|preventDefault={handleGuess}>
-	{#if !won && data.guesses.length < 5}
-		<!-- <input type="text" bind:value={currentGuess} class="guess" /> -->
-		<Textfield type="text" bind:value={currentGuess} label="Type guess here" style="min-width: 50vw" />
+<form onsubmit={handleGuess}>
+	{#if !won && $data.guesses.length < 5}
+		<Textfield
+			type="text"
+			bind:value={currentGuess}
+			label="Type guess here"
+			style="min-width: 50vw"
+		/>
 	{/if}
-	<!-- <a class="how-to-play" href="/wtcc/how-to-play">How to play</a> -->
-
-	<DataTable class="grid">
-		<Head>
-			{#each Array.from(Array(5).keys()) as row (row)}
-				{@const current = row === index}
-				<Row>
-					<Cell class="visually-hidden">Clue {row + 1}</Cell>
-					<Cell class="clue">{data.clues[row]}</Cell>
-					<Cell class="guess">
-						{#if data.guesses[row]}
-							{data.guesses[row]}
-							{#if [data.primaryAnswer, ...data.alternateAnswers].some((answer) => data.guesses[row].toLowerCase() === answer.toLowerCase())}
-								<span>✔️</span>
-							{:else}
-								<span>❌</span>
-							{/if}
-						{/if}
-					</Cell>
-				</Row>
-			{/each}
-		</Head>
-	</DataTable>
-
-	<div class="controls">
-		{#if won || data.guesses.length >= 5}
-			{#if data.primaryAnswer}
-				<p>
-					the answer was "<strong>{data.primaryAnswer}</strong
-					>{#if data.alternateAnswers.length > 0}
-						(also acceptable: {data.alternateAnswers.join(', ')}){/if}"
-				</p>
-			{/if}
-			<Button data-key="enter" class="restart selected" onclick={restartGame}>
-				{won ? 'you won :)' : `game over :(`} play again?
-			</Button>
-		{:else}
-			<Button type="submit" class="submit" disabled={!submittable}>Submit Guess</Button>
-		{/if}
-	</div>
 </form>
+
+<DataTable class="grid">
+    <Body>
+        {#each Array.from(Array(5).keys()) as row (row)}
+            {@const current = row === index}
+
+            <Row>
+                <Cell class="visually-hidden">Clue {row + 1}</Cell>
+                <Cell class="clue">{$data.clues[row]}</Cell>
+                <Cell class="guess">
+                    {#if $data.guesses[row]}
+                        {$data.guesses[row]}
+                        {#if [$data.primaryAnswer, ...$data.alternateAnswers].some((answer) => $data.guesses[row].toLowerCase() === answer.toLowerCase())}
+                            <span>✔️</span>
+                        {:else}
+                            <span>❌</span>
+                        {/if}
+                    {/if}
+                </Cell>
+            </Row>
+        {/each}
+    </Body>
+</DataTable>
+
+<div class="controls">
+	{#if won || $data.guesses.length >= 5}
+		{#if $data.primaryAnswer}
+			<p>
+				the answer was "<strong>{$data.primaryAnswer}</strong>{#if $data.alternateAnswers.length > 0}
+					(also acceptable: {$data.alternateAnswers.join(', ')}){/if}"
+			</p>
+		{/if}
+		<Button data-key="enter" class="restart selected" onclick={restartGame}>
+			{won ? 'you won :)' : `game over :(`} play again?
+		</Button>
+	{:else}
+		<Button type="submit" class="submit" disabled={!submittable}>Submit Guess</Button>
+	{/if}
+</div>
 
 {#if won}
 	<div
@@ -169,7 +180,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: 1rem;
-		flex: 1;
+		padding: 5em 0;
 	}
 
 	:global(.grid) {
@@ -183,11 +194,9 @@
 		justify-content: flex-start;
 	}
 
-
 	.controls {
 		text-align: center;
 		justify-content: center;
 		height: min(18vh, 10rem);
 	}
-
 </style>
