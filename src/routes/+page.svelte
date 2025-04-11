@@ -107,49 +107,68 @@
 
 <div class="mdc-typography--headline3">Current game: {gameNumber} / {games.length}</div>
 
+<div class="game-selector">
+	<label for="game-number">Choose a game:</label>
+	<input
+		id="game-number"
+		type="number"
+		min="1"
+		max={games.length}
+		bind:value={gameNumber}
+		onchange={() => {
+			game = new Game(games, gameNumber - 1);
+			won = false; // Reset the won state
+			initializeData();
+			updateState();
+			showFirstClue();
+		}}
+	/>
+</div>
+
 <Button class="restart selected" onclick={restartGame}>New Game?</Button>
 
 {#if !won && $data.guesses.length < 5}
-    <form class="guess-and-answer-container" onsubmit={handleGuess}>
-        <Textfield
-            type="text"
-            bind:value={currentGuess}
-            label="Type guess here"
-            style="min-width: 50vw"
-        />
-    </form>
+	<form class="guess-and-answer-container" onsubmit={handleGuess}>
+		<Textfield
+			type="text"
+			bind:value={currentGuess}
+			label="Type guess here"
+			style="min-width: 50vw"
+		/>
+	</form>
 {:else}
-    <div class="guess-and-answer-container">
-        {#if $data.primaryAnswer}
-            <p>
-                the answer was "<strong>{$data.primaryAnswer}</strong>{#if $data.alternateAnswers.length > 0}
-                    (also acceptable: {$data.alternateAnswers.join(', ')}){/if}"
-            </p>
-        {/if}
-    </div>
+	<div class="guess-and-answer-container">
+		{#if $data.primaryAnswer}
+			<p>
+				the answer was "<strong>{$data.primaryAnswer}</strong
+				>{#if $data.alternateAnswers.length > 0}
+					(also acceptable: {$data.alternateAnswers.join(', ')}){/if}"
+			</p>
+		{/if}
+	</div>
 {/if}
 
 <DataTable class="grid">
-    <Body>
-        {#each Array.from(Array(5).keys()) as row (row)}
-            {@const current = row === index}
+	<Body>
+		{#each Array.from(Array(5).keys()) as row (row)}
+			{@const current = row === index}
 
-            <Row>
-                <Cell class="visually-hidden">Clue {row + 1}</Cell>
-                <Cell class="clue">{$data.clues[row]}</Cell>
-                <Cell class="guess">
-                    {#if $data.guesses[row]}
-                        {$data.guesses[row]}
-                        {#if [$data.primaryAnswer, ...$data.alternateAnswers].some((answer) => $data.guesses[row].toLowerCase() === answer.toLowerCase())}
-                            <span>✔️</span>
-                        {:else}
-                            <span>❌</span>
-                        {/if}
-                    {/if}
-                </Cell>
-            </Row>
-        {/each}
-    </Body>
+			<Row>
+				<Cell class="visually-hidden">Clue {row + 1}</Cell>
+				<Cell class="clue">{$data.clues[row]}</Cell>
+				<Cell class="guess">
+					{#if $data.guesses[row]}
+						{$data.guesses[row]}
+						{#if [$data.primaryAnswer, ...$data.alternateAnswers].some((answer) => $data.guesses[row].toLowerCase() === answer.toLowerCase())}
+							<span>✔️</span>
+						{:else}
+							<span>❌</span>
+						{/if}
+					{/if}
+				</Cell>
+			</Row>
+		{/each}
+	</Body>
 </DataTable>
 
 <div class="controls">
@@ -176,17 +195,20 @@
 {/if}
 
 <style>
-.guess-and-answer-container {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    padding: 5em 0;
-    min-height: 10rem; /* Ensures consistent vertical space */
-}
+	:global(body) {
+		overflow-x: hidden;
+	}
+	.guess-and-answer-container {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		padding: 5em 0;
+		min-height: 10rem; /* Ensures consistent vertical space */
+	}
 
 	:global(.grid) {
 		width: 80vw;
