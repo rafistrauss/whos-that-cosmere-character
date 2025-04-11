@@ -83,14 +83,6 @@
 </form>
 
 <style>
-	/* Ensure the page is scrollable */
-	html, body {
-		height: 100%;
-		margin: 0;
-		overflow-y: auto;
-	}
-
-	/* Ensure the form does not constrain scrolling */
 	form {
 		display: flex;
 		flex-direction: column;
@@ -98,8 +90,6 @@
 		max-width: 800px;
 		width: 90%;
 		margin: auto;
-		max-height: none;
-		overflow: visible;
 	}
 
 	form > * {
