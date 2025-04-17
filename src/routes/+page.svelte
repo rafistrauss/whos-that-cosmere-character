@@ -116,7 +116,7 @@
 		max={games.length}
 		bind:value={gameNumber}
 		onchange={() => {
-			game = new Game(games, gameNumber - 1);
+			game = new Game(games, String(gameNumber - 1));
 			won = false; // Reset the won state
 			initializeData();
 			updateState();
@@ -182,16 +182,18 @@
 </div>
 
 {#if won}
-	<div
-		style="position: absolute; left: 50%; top: 0%"
-		use:confetti={{
-			particleCount: reducedMotion.current ? 0 : undefined,
-			force: 0.5,
-			stageWidth: window.innerWidth,
-			stageHeight: window.innerHeight,
-			colors: ['#ff3e00', '#40b3ff', '#676778']
-		}}
-	></div>
+	<div style="height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; overflow: hidden; pointer-events: none;">
+		<div
+			style="position: absolute; left: 50%; top: 0%;"
+			use:confetti={{
+				particleCount: reducedMotion.current ? 0 : undefined,
+				force: 0.5,
+				stageWidth: window.innerWidth,
+				stageHeight: window.innerHeight,
+				colors: ['#ff3e00', '#40b3ff', '#676778']
+			}}
+		></div>
+	</div>
 {/if}
 
 <style>

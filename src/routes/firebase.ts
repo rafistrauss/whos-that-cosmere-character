@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, deleteApp  } from "firebase/app";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDh5RdviO7Yizny6md2LDcGq2pVxs-ou00",
@@ -11,4 +11,4 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-export { app };
+export { app, deleteApp };

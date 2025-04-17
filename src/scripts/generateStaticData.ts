@@ -1,0 +1,21 @@
+import { writeFileSync } from 'fs';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { app, deleteApp } from '../routes/firebase';
+
+async function generateStaticData() {
+	const db = getFirestore(app);
+	const cluesCollection = collection(db, 'clues');
+	const snapshot = await getDocs(cluesCollection);
+
+	const clues = snapshot.docs.map((doc) => ({
+		id: doc.id,
+		...doc.data(),
+	}));
+
+	writeFileSync('static/clues.json', JSON.stringify(clues, null, 2));
+
+	deleteApp(app);
+
+}
+
+await generateStaticData();

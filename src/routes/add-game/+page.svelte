@@ -4,12 +4,17 @@
 	import { getFirestore, collection, addDoc } from 'firebase/firestore';
 	import { app } from '../firebase';
 
+	export let data;
+
+	// Use the pre-fetched data
+	const { clues } = data;
+
 	const db = getFirestore(app);
 
 	let newGame = {
 		primaryAnswer: '',
 		alternateAnswers: [], // Initialize with one empty string
-		clues: ['', '', '', '', '']
+		clues: clues || ['', '', '', '', '']
 	};
 
 	function addAlternateAnswer() {

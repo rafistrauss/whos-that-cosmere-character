@@ -1,4 +1,4 @@
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
 import { app } from "../firebase";
 import type { RequestHandler } from "@sveltejs/kit";
 
@@ -14,7 +14,10 @@ export const POST: RequestHandler = async ({ request }) => {
             : [];
 
         // Add the new game to the Firestore collection
-        await addDoc(collection(db, "clues"), newGame);
+        await addDoc(collection(db, "clues"), {
+            ...newGame,
+            dateCreated: new Date().toISOString()
+        });
 
         return new Response(JSON.stringify({ message: "Game submitted successfully" }), {
             status: 200,
@@ -28,3 +31,14 @@ export const POST: RequestHandler = async ({ request }) => {
         });
     }
 };
+
+export async function GET() {
+    const cluesCollection = collection(db, 'clues');
+    const snapshot = await getDocs(cluesCollection);
+
+    const clues = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    return new Response(JSON.stringify(clues), {
+        headers: { 'Content-Type': 'application/json' }
+    });
+}
