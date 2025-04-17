@@ -21,6 +21,9 @@ export async function load() {
 		const querySnapshot = await getDocs(collection(db, "clues"));
 		querySnapshot.forEach((doc) => {
 			const gameData = doc.data() as GameData;
+			if (!gameData.approved) {
+				return; // Skip unapproved games
+			}
 			games.push(gameData);
 			clues.push(gameData.clue);
 		});

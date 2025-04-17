@@ -8,7 +8,7 @@ async function generateStaticData() {
 	const cluesCollection = collection(db, 'clues');
 	const snapshot = await getDocs(cluesCollection);
 
-	const clues = snapshot.docs.map((doc) => ({
+	const clues = snapshot.docs.filter(doc => doc.data().approved).map((doc) => ({
 		id: doc.id,
 		...doc.data(),
 	}));
