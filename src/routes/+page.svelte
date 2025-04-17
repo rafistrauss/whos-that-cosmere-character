@@ -190,7 +190,7 @@
 				force: 0.5,
 				stageWidth: window.innerWidth,
 				stageHeight: window.innerHeight,
-				colors: ['#ff3e00', '#40b3ff', '#676778']
+				colors: ['#ffd400', '#4075a6']
 			}}
 		></div>
 	</div>
