@@ -26,8 +26,8 @@
 		const serializedGame = localStorage.getItem('wtcc');
 		game = new Game(games, serializedGame || undefined);
 
-		initializeData();
 		updateState();
+		initializeData();
 		showFirstClue();
 	});
 
