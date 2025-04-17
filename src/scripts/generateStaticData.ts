@@ -1,6 +1,7 @@
 import { writeFileSync } from 'fs';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import { app, deleteApp } from '../routes/firebase';
+import { app } from '../routes/firebase';
+import { deleteApp } from 'firebase/app';
 
 async function generateStaticData() {
 	const db = getFirestore(app);
