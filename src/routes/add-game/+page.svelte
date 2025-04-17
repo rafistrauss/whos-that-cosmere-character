@@ -41,7 +41,7 @@
 			// Add the new game to the Firestore collection
 			await addDoc(collection(db, 'clues'), gameData);
 
-			alert('Game submitted successfully!');
+			alert('Thanks for submitting a game! It should be ready to play once approved');
 			newGame = { primaryAnswer: '', alternateAnswers: [''], clues: ['', '', '', '', ''] };
 		} catch (error) {
 			console.error('Error submitting game:', error);
