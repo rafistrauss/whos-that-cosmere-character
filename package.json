@@ -14,7 +14,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint ."
+		"lint": "prettier --check . && eslint .",
+		"prebuild": "bun run src/scripts/generateStaticData.ts"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
@@ -42,6 +43,7 @@
 		"vite": "^6.0.0"
 	},
 	"dependencies": {
-		"@smui/textfield": "^8.0.0-beta.3"
+		"@smui/textfield": "^8.0.0-beta.3",
+		"firebase": "^11.2.0"
 	}
 }

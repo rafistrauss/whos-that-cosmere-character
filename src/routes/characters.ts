@@ -1,44 +1,38 @@
-interface GameData {
-    names: string[];
-    clues: string[];
-    shardcastEp?: string;
+import { getFirestore, collection, getDocs } from "firebase/firestore"; 
+import { app } from './firebase'; // Import Firebase app initialization
+
+interface Clue {
+	names: string[];
+	shardcastEp?: string;
+	clues: string[];
 }
 
-const games: GameData[] = [
-    {
-        names: ['Hoid', 'Wit', 'Cephandrius'],
-        clues: [
-            'This character is a POV character',
-            'This character can read',
-            'This character is Invested',
-            "This caracter is old",
-            "This character goes by multiple names"
-        ],
-        shardcastEp: 'Hemalurgy'
-    },
-    {
-        names: ['Sebarial'],
-        clues: [
-            'This character enjoys drink',
-            'This character is a member of the ruling classing',
-            'This character is more than they first appear',
-            'This character is not Invested',
-            'This character spends battles in a tent'
-        ],
-        shardcastEp: 'Hemalurgy'
-    },
-    {
-        clues: [
-            'This character has good aim',
-            'This character has killed a member of the nobility',
-            'This character sees things others do not',
-            'This character has 6 children',
-            'This character is not allowed to use weapons'
-        ],
-        names: ['Rock']
-    }
-];
+interface GameData {
+	clue: Clue;
+}
 
-const clues = games.map(game => game.clues);
+const db = getFirestore(app);
+
+const games: GameData[] = [];
+const clues: Clue[] = [];
+
+async function fetchAllGameData(): Promise<void> {
+	const querySnapshot = await getDocs(collection(db, "clues"));
+	querySnapshot.forEach((doc) => {
+		const gameData = doc.data() as GameData;
+		games.push(gameData);
+		clues.push(gameData.clue);
+	});
+}
+
+// Call the async function to fetch data
+fetchAllGameData().then(() => {
+	console.log('Game data fetched successfully');
+	console.log(games, clues);
+}).catch((error) => {
+	console.error('Error fetching game data:', error);
+});
+
+console.log(games, clues);
 
 export { games, clues };

@@ -1,5 +1,9 @@
 import adapter from '@sveltejs/adapter-static';
 
+const isCI = process.env.CI === 'true';
+
+console.log(`isCI: ${isCI}`);
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	kit: {
@@ -8,8 +12,8 @@ const config = {
 			// fallback: '404.html'
 		}),
 		paths: {
-			base: process.argv.includes('dev') ? '' : process.env.BASE_PATH,
-			assets: process.argv.includes('dev') ? '' : 'https://rafistrauss.github.io/whos-that-cosmere-character'
+			base: isCI ? process.env.BASE_PATH : '',
+			assets: isCI ? 'https://rafistrauss.github.io/whos-that-cosmere-character' : ''
 		}
 	},
 };

@@ -3,41 +3,60 @@
 	import { Game } from './game';
 	import Textfield from '@smui/textfield';
 	import Button from '@smui/button';
-	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
+	import DataTable, { Body, Row, Cell } from '@smui/data-table';
+	import { writable } from 'svelte/store';
 
 	import { onMount } from 'svelte';
-	import { games } from './characters';
+	import type { PageProps } from './$types';
+	let { data: pageProps }: PageProps = $props();
+
+	let { games } = pageProps;
 
 	let game: Game;
-	let currentGuess = '';
-	let won = false;
-	let submittable = false;
+	let currentGuess = $state('');
+	let won = $state(false);
+	let submittable = $derived(currentGuess.length > 0);
 	let form: any = {};
-	let data: any = { clues: [], guesses: [], primaryAnswer: '', alternateAnswers: [] };
+	const data = writable({ clues: [], guesses: [], primaryAnswer: '', alternateAnswers: [] });
 	let index: number = 1;
 	let reducedMotion: any = { current: false };
-	let gameNumber = 1;
+	let gameNumber = $state(1);
+
+	let gameplayInstructions = `Welcome to the Cosmere Character Guessing Game! Here's how to play:
+	1. Select a game from the dropdown or start a new one.
+	2. You will be given clues about a character from the Cosmere universe.
+	3. Use the clues to guess the character's name.
+	4. Type your guess in the input field and submit it.
+	5. If your guess is correct, you win! Otherwise, try again with another clue.
+	6. You have a maximum of 5 guesses per game.`;
+
+	// Updated `showInstructions` to use `$state` for reactivity
+	let showInstructions = $state(false);
 
 	onMount(() => {
 		const serializedGame = localStorage.getItem('wtcc');
-		game = new Game(serializedGame || undefined);
-		
-		initializeData();
+		game = new Game(games, serializedGame || undefined);
+
 		updateState();
+		initializeData();
 		showFirstClue();
 	});
 
 	function initializeData() {
 		gameNumber = game.index + 1;
-		data.guesses = game.guesses;
-		data.clues = Array.from({ length: game.cluesGiven }, (_, i) => game.getClue(i));
+		data.update((d) => {
+			d.guesses = game.guesses;
+			d.clues = Array.from({ length: game.cluesGiven }, (_, i) => game.getClue(i));
+			console.log('initial data.clues', d.clues);
 
-		if (won) {
-			data.clues = Array.from({ length: 5 }, (_, i) => game.getClue(i));
-		}
+			if (won) {
+				d.clues = Array.from({ length: 5 }, (_, i) => game.getClue(i));
+			}
 
-		data.primaryAnswer = game.primaryAnswer;
-		data.alternateAnswers = game.alternateAnswers;
+			d.primaryAnswer = game.primaryAnswer;
+			d.alternateAnswers = game.alternateAnswers;
+			return d;
+		});
 	}
 
 	function updateState() {
@@ -47,11 +66,11 @@
 			[game.primaryAnswer, ...game.alternateAnswers].some(
 				(answer) => game.guesses[game.guesses.length - 1].toLowerCase() === answer.toLowerCase()
 			);
-		submittable = currentGuess.length > 0;
 		localStorage.setItem('wtcc', game.toString());
 	}
 
-	function handleGuess() {
+	function handleGuess(event: SubmitEvent | KeyboardEvent) {
+		event.preventDefault();
 		if (game.enter(currentGuess)) {
 			won = true;
 		}
@@ -62,26 +81,30 @@
 
 	function handleKey(event: KeyboardEvent) {
 		if (event.key === 'Enter' && submittable) {
-			handleGuess();
+			handleGuess(event);
 		}
 		updateState();
 	}
 
 	function restartGame() {
 		localStorage.removeItem('wtcc');
-		game = new Game();
+		game = new Game(games);
+		won = false; // Reset the won state
 		initializeData();
 		updateState();
 		showFirstClue();
 	}
 
 	function showFirstClue() {
-		if (data.clues.length === 0) {
-			data.clues.push(game.getClue(0));
-		}
+		data.update((d) => {
+			if (d.clues.length === 0) {
+				const clue = game.getClue(0);
+				console.log('Adding first clue:', clue);
+				d.clues.push(clue);
+			}
+			return d;
+		});
 	}
-
-	$: updateState();
 </script>
 
 <svelte:window onkeyup={handleKey} />
@@ -95,71 +118,111 @@
 
 <div class="mdc-typography--headline3">Current game: {gameNumber} / {games.length}</div>
 
+<div class="game-selector">
+	<label for="game-number">Choose a game:</label>
+	<input
+		id="game-number"
+		type="number"
+		min="1"
+		max={games.length}
+		bind:value={gameNumber}
+		onchange={() => {
+			game = new Game(games, String(gameNumber - 1));
+			won = false; // Reset the won state
+			initializeData();
+			updateState();
+			showFirstClue();
+		}}
+	/>
+</div>
 
-<Button class="restart selected" onclick={restartGame}> New Game? </Button>
+<Button class="restart selected" onclick={restartGame}>New Game?</Button>
 
-<form on:submit|preventDefault={handleGuess}>
-	{#if !won && data.guesses.length < 5}
-		<!-- <input type="text" bind:value={currentGuess} class="guess" /> -->
-		<Textfield type="text" bind:value={currentGuess} label="Type guess here" style="min-width: 50vw" />
+<div class="instructions">
+	<Button onclick={() => (showInstructions = !showInstructions)}>
+		{showInstructions ? 'Hide Instructions' : 'Show Instructions'}
+	</Button>
+	{#if showInstructions}
+		<div class="instructions-content">
+			<pre>{gameplayInstructions}</pre>
+		</div>
 	{/if}
-	<!-- <a class="how-to-play" href="/wtcc/how-to-play">How to play</a> -->
+</div>
 
-	<DataTable class="grid">
-		<Head>
-			{#each Array.from(Array(5).keys()) as row (row)}
-				{@const current = row === index}
-				<Row>
-					<Cell class="visually-hidden">Clue {row + 1}</Cell>
-					<Cell class="clue">{data.clues[row]}</Cell>
-					<Cell class="guess">
-						{#if data.guesses[row]}
-							{data.guesses[row]}
-							{#if [data.primaryAnswer, ...data.alternateAnswers].some((answer) => data.guesses[row].toLowerCase() === answer.toLowerCase())}
-								<span>✔️</span>
-							{:else}
-								<span>❌</span>
-							{/if}
-						{/if}
-					</Cell>
-				</Row>
-			{/each}
-		</Head>
-	</DataTable>
-
-	<div class="controls">
-		{#if won || data.guesses.length >= 5}
-			{#if data.primaryAnswer}
-				<p>
-					the answer was "<strong>{data.primaryAnswer}</strong
-					>{#if data.alternateAnswers.length > 0}
-						(also acceptable: {data.alternateAnswers.join(', ')}){/if}"
-				</p>
-			{/if}
-			<Button data-key="enter" class="restart selected" onclick={restartGame}>
-				{won ? 'you won :)' : `game over :(`} play again?
-			</Button>
-		{:else}
-			<Button type="submit" class="submit" disabled={!submittable}>Submit Guess</Button>
+{#if !won && $data.guesses.length < 5}
+	<form class="guess-and-answer-container" onsubmit={handleGuess}>
+		<Textfield
+			type="text"
+			bind:value={currentGuess}
+			label="Type guess here"
+			style="min-width: 50vw"
+		/>
+	</form>
+{:else}
+	<div class="guess-and-answer-container">
+		{#if $data.primaryAnswer}
+			<p>
+				the answer was "<strong>{$data.primaryAnswer}</strong
+				>{#if $data.alternateAnswers.length > 0}
+					(also acceptable: {$data.alternateAnswers.join(', ')}){/if}"
+			</p>
 		{/if}
 	</div>
-</form>
+{/if}
+
+<DataTable class="grid">
+	<Body>
+		{#each Array.from(Array(5).keys()) as row (row)}
+			{@const current = row === index}
+
+			<Row>
+				<Cell class="visually-hidden">Clue {row + 1}</Cell>
+				<Cell class="clue">{$data.clues[row]}</Cell>
+				<Cell class="guess">
+					{#if $data.guesses[row]}
+						{$data.guesses[row]}
+						{#if [$data.primaryAnswer, ...$data.alternateAnswers].some((answer) => $data.guesses[row].toLowerCase() === answer.toLowerCase())}
+							<span>✔️</span>
+						{:else}
+							<span>❌</span>
+						{/if}
+					{/if}
+				</Cell>
+			</Row>
+		{/each}
+	</Body>
+</DataTable>
+
+<div class="controls">
+	{#if won || $data.guesses.length >= 5}
+		<Button data-key="enter" class="restart selected" onclick={restartGame}>
+			{won ? 'you won :)' : `game over :(`} play again?
+		</Button>
+	{:else}
+		<Button type="submit" class="submit" disabled={!submittable}>Submit Guess</Button>
+	{/if}
+</div>
 
 {#if won}
-	<div
-		style="position: absolute; left: 50%; top: 0%"
-		use:confetti={{
-			particleCount: reducedMotion.current ? 0 : undefined,
-			force: 0.5,
-			stageWidth: window.innerWidth,
-			stageHeight: window.innerHeight,
-			colors: ['#ff3e00', '#40b3ff', '#676778']
-		}}
-	></div>
+	<div style="height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; overflow: hidden; pointer-events: none;">
+		<div
+			style="position: absolute; left: 50%; top: 0%;"
+			use:confetti={{
+				particleCount: reducedMotion.current ? 0 : undefined,
+				force: 0.5,
+				stageWidth: window.innerWidth,
+				stageHeight: window.innerHeight,
+				colors: ['#ffd400', '#4075a6']
+			}}
+		></div>
+	</div>
 {/if}
 
 <style>
-	form {
+	:global(body) {
+		overflow-x: hidden;
+	}
+	.guess-and-answer-container {
 		width: 100%;
 		height: 100%;
 		display: flex;
@@ -167,28 +230,9 @@
 		align-items: center;
 		justify-content: center;
 		gap: 1rem;
-		flex: 1;
-	}
-
-	.how-to-play {
-		color: var(--color-text);
-	}
-
-	.how-to-play::before {
-		content: 'i';
-		display: inline-block;
-		font-size: 0.8em;
-		font-weight: 900;
-		width: 1em;
-		height: 1em;
-		padding: 0.2em;
-		line-height: 1;
-		border: 1.5px solid var(--color-text);
-		border-radius: 50%;
-		text-align: center;
-		margin: 0 0.5em 0 0;
-		position: relative;
-		top: -0.05em;
+		padding: 5em 0;
+		padding-top: 2.5em
+		min-height: 10rem; /* Ensures consistent vertical space */
 	}
 
 	:global(.grid) {
@@ -202,62 +246,26 @@
 		justify-content: flex-start;
 	}
 
-	.grid .row {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		grid-gap: 0.2rem;
-		margin: 0 0 0.2rem 0;
-	}
-
-	.clue {
-		background: var(--color-theme-2);
-		color: white;
-		padding: 0.5rem;
-		border-radius: 2px;
-	}
-
-	.guess {
-		color: black;
-		padding: 0.5rem;
-		border-radius: 2px;
-		background: transparent;
-		border: none;
-		border-bottom: 2px solid darkgray;
-	}
-
 	.controls {
 		text-align: center;
 		justify-content: center;
 		height: min(18vh, 10rem);
 	}
 
-	.submit {
-		width: 100%;
+	.instructions {
+		text-align: center;
+		margin: 1rem 0;
+	}
+
+	.instructions-content {
+		margin-top: 1rem;
 		padding: 1rem;
-		background: rgba(255, 255, 255, 0.5);
-		border-radius: 2px;
-		border: none;
+		border: 1px solid #ccc;
+		border-radius: 5px;
 	}
 
-	.submit:focus,
-	.submit:hover {
-		background: var(--color-theme-1);
-		color: white;
-		outline: none;
-	}
-
-	.restart {
-		width: 100%;
-		padding: 1rem;
-		background: rgba(255, 255, 255, 0.5);
-		border-radius: 2px;
-		border: none;
-	}
-
-	.restart:focus,
-	.restart:hover {
-		background: var(--color-theme-1);
-		color: white;
-		outline: none;
+	.instructions-content pre {
+		background-color: transparent;
+		color: inherit;
 	}
 </style>
