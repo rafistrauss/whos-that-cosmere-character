@@ -22,6 +22,17 @@
 	let reducedMotion: any = { current: false };
 	let gameNumber = $state(1);
 
+	let gameplayInstructions = `Welcome to the Cosmere Character Guessing Game! Here's how to play:
+	1. Select a game from the dropdown or start a new one.
+	2. You will be given clues about a character from the Cosmere universe.
+	3. Use the clues to guess the character's name.
+	4. Type your guess in the input field and submit it.
+	5. If your guess is correct, you win! Otherwise, try again with another clue.
+	6. You have a maximum of 5 guesses per game.`;
+
+	// Updated `showInstructions` to use `$state` for reactivity
+	let showInstructions = $state(false);
+
 	onMount(() => {
 		const serializedGame = localStorage.getItem('wtcc');
 		game = new Game(games, serializedGame || undefined);
@@ -127,6 +138,17 @@
 
 <Button class="restart selected" onclick={restartGame}>New Game?</Button>
 
+<div class="instructions">
+	<Button onclick={() => (showInstructions = !showInstructions)}>
+		{showInstructions ? 'Hide Instructions' : 'Show Instructions'}
+	</Button>
+	{#if showInstructions}
+		<div class="instructions-content">
+			<pre>{gameplayInstructions}</pre>
+		</div>
+	{/if}
+</div>
+
 {#if !won && $data.guesses.length < 5}
 	<form class="guess-and-answer-container" onsubmit={handleGuess}>
 		<Textfield
@@ -209,6 +231,7 @@
 		justify-content: center;
 		gap: 1rem;
 		padding: 5em 0;
+		padding-top: 2.5em
 		min-height: 10rem; /* Ensures consistent vertical space */
 	}
 
@@ -227,5 +250,22 @@
 		text-align: center;
 		justify-content: center;
 		height: min(18vh, 10rem);
+	}
+
+	.instructions {
+		text-align: center;
+		margin: 1rem 0;
+	}
+
+	.instructions-content {
+		margin-top: 1rem;
+		padding: 1rem;
+		border: 1px solid #ccc;
+		border-radius: 5px;
+	}
+
+	.instructions-content pre {
+		background-color: transparent;
+		color: inherit;
 	}
 </style>
