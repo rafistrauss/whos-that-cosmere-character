@@ -17,6 +17,21 @@
 		clues: clues || ['', '', '', '', '']
 	};
 
+	let jsonInput = '';
+
+	function populateFromJson() {
+		try {
+			const parsed = JSON.parse(jsonInput);
+			if (parsed.primaryAnswer) newGame.primaryAnswer = parsed.primaryAnswer;
+			if (Array.isArray(parsed.alternateAnswers)) newGame.alternateAnswers = parsed.alternateAnswers;
+			if (Array.isArray(parsed.clues)) newGame.clues = parsed.clues;
+			alert('Fields populated successfully!');
+		} catch (error) {
+			console.error('Invalid JSON:', error);
+			alert('Failed to parse JSON. Please check the format.');
+		}
+	}
+
 	function addAlternateAnswer() {
 		newGame.alternateAnswers = [...newGame.alternateAnswers, '']; // Reassign to trigger reactivity
         console.log('New alternate answer added:', newGame.alternateAnswers);
@@ -34,7 +49,8 @@
 				clue: {
 					names: [newGame.primaryAnswer, ...newGame.alternateAnswers.filter(answer => answer.trim() !== '')],
 					shardcastEp: '', // Add shardcast episode if applicable
-					clues: newGame.clues.filter(clue => clue.trim() !== '')
+					clues: newGame.clues.filter(clue => clue.trim() !== ''),
+					approved: false // Set to false initially
 				}
 			};
 
@@ -83,6 +99,16 @@
 			required
 		/>
 	{/each}
+
+	{#if import.meta.env.MODE === 'development'}
+		<h2>JSON Input</h2>
+		<Textfield
+			bind:value={jsonInput}
+			label="Paste JSON here"
+			style="width: 100%;"
+		/>
+		<Button type="button" onclick={populateFromJson}>Populate Fields</Button>
+	{/if}
 
 	<Button type="submit">Submit Game</Button>
 </form>

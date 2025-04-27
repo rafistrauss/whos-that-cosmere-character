@@ -2,8 +2,54 @@
 	import { base } from '$app/paths';
 	import Header from './Header.svelte';
 	import '../app.css';
+	import { auth, provider, onAuthStateChanged, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from './firebase';
 
 	let { children } = $props();
+	let user = null;
+
+	onAuthStateChanged(auth, (currentUser) => {
+		user = currentUser;
+	});
+
+	async function login() {
+		try {
+			await signInWithPopup(auth, provider);
+			alert('Logged in successfully!');
+		} catch (error) {
+			console.error('Login failed:', error);
+			alert('Failed to log in.');
+		}
+	}
+
+	async function register(email: string, password: string) {
+		try {
+			await createUserWithEmailAndPassword(auth, email, password);
+			alert('Registration successful!');
+		} catch (error) {
+			console.error('Registration failed:', error);
+			alert('Failed to register.');
+		}
+	}
+
+	async function loginWithEmail(email: string, password: string) {
+		try {
+			await signInWithEmailAndPassword(auth, email, password);
+			alert('Logged in successfully!');
+		} catch (error) {
+			console.error('Login failed:', error);
+			alert('Failed to log in.');
+		}
+	}
+
+	async function logout() {
+		try {
+			await signOut(auth);
+			alert('Logged out successfully!');
+		} catch (error) {
+			console.error('Logout failed:', error);
+			alert('Failed to log out.');
+		}
+	}
 </script>
 
 <svelte:head>
