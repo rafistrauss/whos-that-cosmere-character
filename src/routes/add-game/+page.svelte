@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Textfield from '@smui/textfield';
 	import Button from '@smui/button';
-	import { getFirestore, collection, addDoc } from 'firebase/firestore';
+	import { getFirestore, collection, addDoc, doc, getDoc } from 'firebase/firestore';
 	import { app } from '../firebase';
+	import { onMount } from 'svelte';
 
 	export let data;
 
@@ -18,6 +19,22 @@
 	};
 
 	let jsonInput = '';
+
+	let approvalsEnabled: boolean | null = null;
+
+	async function fetchApprovalsStatus() {
+		const docRef = doc(db, 'approvals', 'enabled');
+		const docSnap = await getDoc(docRef);
+		if (docSnap.exists()) {
+			approvalsEnabled = docSnap.data().enabled;
+		} else {
+			console.error('No such document!');
+		}
+	}
+
+	onMount(() => {
+		fetchApprovalsStatus();
+	});
 
 	function populateFromJson() {
 		try {
@@ -67,51 +84,60 @@
 </script>
 
 <h1>Submit a New Game</h1>
-<form onsubmit={submitNewGame}>
-	<Textfield
-		bind:value={newGame.primaryAnswer}
-		label="Primary Answer"
-		style="width: 100%;"
-		required
-	/>
 
-	{#if newGame.alternateAnswers.length > 0}
-		<h2>Alternate Answers</h2>
-		{#each newGame.alternateAnswers as answer, index}
-			<div style="display: flex; align-items: center; gap: 1rem;">
-				<Textfield
-					bind:value={newGame.alternateAnswers[index]}
-					label={`Alternate Answer ${index + 1}`}
-					style="width: 100%;"
-				/>
-				<Button type="button" onclick={() => removeAlternateAnswer(index)}>Remove</Button>
-			</div>
-		{/each}
-	{/if}
-	<Button type="button" onclick={addAlternateAnswer}>Add Alternate Answer</Button>
-
-	<h2>Clues</h2>
-	{#each newGame.clues as clue, index}
+{#if approvalsEnabled === false}
+	<p style="color: red; font-weight: bold; text-align: center;">
+		Submission of new clues has been paused for maintenance. Please try again later.
+	</p>
+{:else if approvalsEnabled === true}
+	<form onsubmit={submitNewGame}>
 		<Textfield
-			bind:value={newGame.clues[index]}
-			label={`Clue ${index + 1}`}
+			bind:value={newGame.primaryAnswer}
+			label="Primary Answer"
 			style="width: 100%;"
 			required
 		/>
-	{/each}
 
-	{#if import.meta.env.MODE === 'development'}
-		<h2>JSON Input</h2>
-		<Textfield
-			bind:value={jsonInput}
-			label="Paste JSON here"
-			style="width: 100%;"
-		/>
-		<Button type="button" onclick={populateFromJson}>Populate Fields</Button>
-	{/if}
+		{#if newGame.alternateAnswers.length > 0}
+			<h2>Alternate Answers</h2>
+			{#each newGame.alternateAnswers as answer, index}
+				<div style="display: flex; align-items: center; gap: 1rem;">
+					<Textfield
+						bind:value={newGame.alternateAnswers[index]}
+						label={`Alternate Answer ${index + 1}`}
+						style="width: 100%;"
+					/>
+					<Button type="button" onclick={() => removeAlternateAnswer(index)}>Remove</Button>
+				</div>
+			{/each}
+		{/if}
+		<Button type="button" onclick={addAlternateAnswer}>Add Alternate Answer</Button>
 
-	<Button type="submit">Submit Game</Button>
-</form>
+		<h2>Clues</h2>
+		{#each newGame.clues as clue, index}
+			<Textfield
+				bind:value={newGame.clues[index]}
+				label={`Clue ${index + 1}`}
+				style="width: 100%;"
+				required
+			/>
+		{/each}
+
+		{#if import.meta.env.MODE === 'development'}
+			<h2>JSON Input</h2>
+			<Textfield
+				bind:value={jsonInput}
+				label="Paste JSON here"
+				style="width: 100%;"
+			/>
+			<Button type="button" onclick={populateFromJson}>Populate Fields</Button>
+		{/if}
+
+		<Button type="submit">Submit Game</Button>
+	</form>
+{:else}
+	<p>Loading...</p>
+{/if}
 
 <style>
 	form {
