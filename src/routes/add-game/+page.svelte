@@ -85,6 +85,11 @@
 
 <h1>Submit a New Game</h1>
 
+<details>
+  <summary>What does submitting a new game mean?</summary>
+  <p>Submitting a new game allows you to contribute a new set of clues and answers to the game database. Each game consists of a primary answer, optional alternate answers, and a set of clues. Once submitted, your game will be reviewed and approved before it becomes available for others to play.</p>
+</details>
+
 {#if approvalsEnabled === false}
 	<p style="color: red; font-weight: bold; text-align: center;">
 		Submission of new clues has been paused for maintenance. Please try again later.
@@ -151,5 +156,9 @@
 
 	form > * {
 		width: 100%;
+	}
+
+	details {
+		cursor: pointer;
 	}
 </style>
