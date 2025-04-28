@@ -185,7 +185,6 @@
 						{/if}
 					{/if}
 				</Cell>
-				<Cell class="visually-hidden">Clue {row + 1}</Cell>
 				<Cell class="clue">{$data.clues[row]}</Cell>
 				<Cell class="guess">
 					{#if $data.guesses[row]}
@@ -243,15 +242,51 @@
 		min-height: 10rem; /* Ensures consistent vertical space */
 	}
 
+	/* Adjust table layout for better responsiveness */
 	:global(.grid) {
-		width: 80vw;
-		align-self: center;
-		justify-self: center;
+		overflow-x: auto;
 		width: 100%;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
+		border: none; /* Hide table gridlines */
+	}
+
+	:global(.grid table) {
+		width: 100%;
+		border-collapse: collapse;
+		border: none; /* Hide table gridlines */
+	}
+
+	:global(.grid th),
+	:global(.grid td) {
+		padding: 0.5rem;
+		text-align: left;
+		border: none; /* Hide table gridlines */
+		vertical-align: top; /* Allow content to expand vertically */
+	}
+
+	/* Ensure the first column is wide enough */
+	:global(.grid .status) {
+		width: 2em;
+		text-align: center;
+	}
+
+	/* Allow the clue column to expand vertically */
+	:global(.grid .clue) {
+		white-space: normal;
+		word-wrap: break-word;
+	}
+
+	/* Make the 3rd column (guess) more responsive */
+	:global(.grid .guess) {
+		white-space: normal;
+		word-wrap: break-word;
+		max-width: 100%;
+	}
+
+	/* Ensure table is scrollable on smaller screens */
+	@media (max-width: 768px) {
+		:global(.grid) {
+			overflow-x: scroll;
+		}
 	}
 
 	.controls {
