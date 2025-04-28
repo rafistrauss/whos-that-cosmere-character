@@ -199,7 +199,7 @@
 			{won ? 'you won :)' : `game over :(`} play again?
 		</Button>
 	{:else}
-		<Button type="submit" class="submit" disabled={!submittable}>Submit Guess</Button>
+		<Button onclick={handleGuess} type="submit" class="submit" disabled={!submittable}>Submit Guess</Button>
 	{/if}
 </div>
 
