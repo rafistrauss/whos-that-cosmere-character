@@ -59,6 +59,12 @@ async function denyClue(id: string) {
     fetchClues();
 }
 
+async function deleteApprovedClue(id: string) {
+    const clueRef = doc(db, 'clues', id);
+    await deleteDoc(clueRef);
+    fetchClues();
+}
+
 async function login() {
     try {
         await signInWithEmailAndPassword(auth, email, password);
@@ -214,6 +220,7 @@ onMount(() => {
                     {:else}
                         <em>Invalid clue data</em>
                     {/if}
+                    <button class="deny-button" on:click={() => deleteApprovedClue(clue.id)}>Delete</button>
                 </li>
             {/each}
         </ul>
