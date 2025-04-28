@@ -176,16 +176,20 @@
 			{@const current = row === index}
 
 			<Row>
-				<Cell class="visually-hidden">Clue {row + 1}</Cell>
-				<Cell class="clue">{$data.clues[row]}</Cell>
-				<Cell class="guess">
+				<Cell class="status">
 					{#if $data.guesses[row]}
-						{$data.guesses[row]}
 						{#if [$data.primaryAnswer, ...$data.alternateAnswers].some((answer) => $data.guesses[row].toLowerCase() === answer.toLowerCase())}
 							<span>✔️</span>
 						{:else}
 							<span>❌</span>
 						{/if}
+					{/if}
+				</Cell>
+				<Cell class="visually-hidden">Clue {row + 1}</Cell>
+				<Cell class="clue">{$data.clues[row]}</Cell>
+				<Cell class="guess">
+					{#if $data.guesses[row]}
+						{$data.guesses[row]}
 					{/if}
 				</Cell>
 			</Row>
@@ -221,6 +225,10 @@
 <style>
 	:global(body) {
 		overflow-x: hidden;
+	}
+
+	.status {
+		width: 1em;
 	}
 	.guess-and-answer-container {
 		width: 100%;
