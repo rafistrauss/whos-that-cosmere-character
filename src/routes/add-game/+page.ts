@@ -1,19 +1,3 @@
-import { app } from '../firebase';
-
+// since there's no dynamic data here, we can prerender
+// it so that it gets served as a static asset in production
 export const prerender = true;
-
-export async function load({ fetch }) {
-    const response = await fetch('/clues.json');
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch clues');
-    }
-
-    const clues = await response.json();
-
-    return {
-        props: {
-            clues
-        }
-    };
-}
