@@ -88,7 +88,7 @@
 
 	function changeGame(newNumber: number) {
 		gameNumber = Math.max(1, Math.min(newNumber, games.length));
-		game = new Game(games, String(gameNumber - 1));
+		game = new Game(games, `${gameNumber - 1}--1`);
 		won = false;
 		initializeData();
 		updateState();
@@ -234,8 +234,11 @@
 		overflow-x: hidden;
 	}
 
-	.status {
+	:global(.status) {
 		width: 1em;
+		text-overflow: unset;
+		white-space: unset;
+		overflow: unset;
 	}
 	.guess-and-answer-container {
 		width: 100%;
@@ -246,7 +249,7 @@
 		justify-content: center;
 		gap: 1rem;
 		padding: 5em 0;
-		padding-top: 2.5em
+		padding-top: 2.5em;
 		min-height: 10rem; /* Ensures consistent vertical space */
 	}
 
@@ -342,6 +345,7 @@
 		border: 1px solid currentColor;
 		border-radius: 0.375rem;
 		background: transparent;
+		color: white;
 		cursor: pointer;
 		touch-action: manipulation;
 		line-height: 1;
