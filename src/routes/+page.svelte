@@ -187,9 +187,9 @@
 				<Cell class="status">
 					{#if $data.guesses[row]}
 						{#if [$data.primaryAnswer, ...$data.alternateAnswers].some((answer) => $data.guesses[row].toLowerCase() === answer.toLowerCase())}
-							<span>✔️</span>
+							<span class="check">✓</span>
 						{:else}
-							<span>❌</span>
+							<span class="cross">✕</span>
 						{/if}
 					{/if}
 				</Cell>
@@ -360,5 +360,17 @@
 		min-width: 5rem;
 		text-align: center;
 		font-size: 1rem;
+	}
+
+	.check {
+		color: #4caf50;
+		font-weight: bold;
+		font-size: 1.2em;
+	}
+
+	.cross {
+		color: #f44336;
+		font-weight: bold;
+		font-size: 1.2em;
 	}
 </style>
