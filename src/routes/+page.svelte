@@ -86,6 +86,15 @@
 		updateState();
 	}
 
+	function changeGame(newNumber: number) {
+		gameNumber = Math.max(1, Math.min(newNumber, games.length));
+		game = new Game(games, `${gameNumber - 1}--1`);
+		won = false;
+		initializeData();
+		updateState();
+		showFirstClue();
+	}
+
 	function restartGame() {
 		localStorage.removeItem('wtcc');
 		game = new Game(games);
@@ -116,24 +125,23 @@
 
 <h1 class="visually-hidden">Cosmere Character Guessing Game</h1>
 
-<div class="mdc-typography--headline3">Current game: {gameNumber} / {games.length}</div>
-
 <div class="game-selector">
-	<label for="game-number">Choose a game:</label>
-	<input
-		id="game-number"
-		type="number"
-		min="1"
-		max={games.length}
-		bind:value={gameNumber}
-		onchange={() => {
-			game = new Game(games, String(gameNumber - 1));
-			won = false; // Reset the won state
-			initializeData();
-			updateState();
-			showFirstClue();
-		}}
-	/>
+	<span>Choose a game:</span>
+	<div class="game-selector-controls">
+		<button
+			class="game-nav-btn"
+			disabled={gameNumber <= 1}
+			onclick={() => changeGame(gameNumber - 1)}
+			aria-label="Previous game"
+		>‹</button>
+		<span class="game-number-display">{gameNumber} / {games.length}</span>
+		<button
+			class="game-nav-btn"
+			disabled={gameNumber >= games.length}
+			onclick={() => changeGame(gameNumber + 1)}
+			aria-label="Next game"
+		>›</button>
+	</div>
 </div>
 
 <Button class="restart selected" onclick={restartGame}>New Game?</Button>
@@ -179,9 +187,9 @@
 				<Cell class="status">
 					{#if $data.guesses[row]}
 						{#if [$data.primaryAnswer, ...$data.alternateAnswers].some((answer) => $data.guesses[row].toLowerCase() === answer.toLowerCase())}
-							<span>✔️</span>
+							<span class="check">✓</span>
 						{:else}
-							<span>❌</span>
+							<span class="cross">✕</span>
 						{/if}
 					{/if}
 				</Cell>
@@ -226,8 +234,11 @@
 		overflow-x: hidden;
 	}
 
-	.status {
+	:global(.status) {
 		width: 1em;
+		text-overflow: unset;
+		white-space: unset;
+		overflow: unset;
 	}
 	.guess-and-answer-container {
 		width: 100%;
@@ -238,7 +249,7 @@
 		justify-content: center;
 		gap: 1rem;
 		padding: 5em 0;
-		padding-top: 2.5em
+		padding-top: 2.5em;
 		min-height: 10rem; /* Ensures consistent vertical space */
 	}
 
@@ -310,5 +321,56 @@
 	.instructions-content pre {
 		background-color: transparent;
 		color: inherit;
+	}
+	.game-selector {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin: 0.5rem 0;
+	}
+
+	.game-selector-controls {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.game-nav-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 2.75rem;
+		min-height: 2.75rem;
+		font-size: 1.5rem;
+		border: 1px solid currentColor;
+		border-radius: 0.375rem;
+		background: transparent;
+		color: white;
+		cursor: pointer;
+		touch-action: manipulation;
+		line-height: 1;
+	}
+
+	.game-nav-btn:disabled {
+		opacity: 0.35;
+		cursor: not-allowed;
+	}
+
+	.game-number-display {
+		min-width: 5rem;
+		text-align: center;
+		font-size: 1rem;
+	}
+
+	.check {
+		color: #4caf50;
+		font-weight: bold;
+		font-size: 1.2em;
+	}
+
+	.cross {
+		color: #f44336;
+		font-weight: bold;
+		font-size: 1.2em;
 	}
 </style>
